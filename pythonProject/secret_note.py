@@ -1,5 +1,6 @@
 import tkinter as tk
 from cryptography.fernet import Fernet
+from tkinter import messagebox
 
 
 # Function to generate a new key and save it to key.txt
@@ -7,27 +8,28 @@ def anahtarOlustur():
     global key1
     key1 = Fernet.generate_key()
 
-    with open("key.txt", "wb") as file:
-        file.write(key1)
+    with open("key.txt", "ab") as file:
+        file.write(key1 + b"\n")
 
     status_label.config(text="Anahtar oluşturuldu ve kaydedildi.")
 
 
-# Function to read the key from key.txt
+# Function to read all keys from key.txt
 def anahtariOku():
-    global key1
+    global keys
     key_input = key_entry.get().strip()
     if key_input:
         try:
             key1 = key_input.encode()
             Fernet(key1)  # Check if the key is valid
+            keys = [key1]
             return True
         except Exception as e:
             status_label.config(text=f"Geçersiz anahtar girdisi: {str(e)}")
             return False
     try:
         with open("key.txt", "rb") as file:
-            key1 = file.read()
+            keys = file.read().splitlines()
         return True
     except FileNotFoundError:
         status_label.config(text="Anahtar dosyası bulunamadı. Lütfen önce anahtar oluşturun.")
@@ -39,13 +41,15 @@ def sifreleme():
     if not anahtariOku():
         return
 
+    title = baslik_entry.get().strip()
+    message = gizli_entry.get("1.0", tk.END).strip()
+
+    if not title or not message:
+        messagebox.showerror("Hata", "Başlık ve mesaj boş bırakılamaz.")
+        return
+
     try:
-        f = Fernet(key1)
-        title = baslik_entry.get().strip()
-        message = gizli_entry.get("1.0", tk.END).strip()
-        if message == "" or title == "":
-            status_label.config(text="Başlık ve mesaj boş bırakılamaz.")
-            return
+        f = Fernet(keys[-1])  # Use the latest key for encryption
 
         combined_message = f"{title}\n{message}"
         x = combined_message.encode()
@@ -70,7 +74,6 @@ def cozme():
         with open("encrypted_message.txt", "rb") as file:
             encrypted_messages = file.readlines()
 
-        f = Fernet(key1)
         gizli_entry.delete("1.0", tk.END)
         entered_title = baslik_entry.get().strip()
 
@@ -80,18 +83,22 @@ def cozme():
 
         found = False
         for encrypted_message in encrypted_messages:
-            try:
-                cozulmus = f.decrypt(encrypted_message.strip())
-                cozulmus_mesaj = cozulmus.decode()
-                title, message = cozulmus_mesaj.split("\n", 1)
+            for key in keys:
+                try:
+                    f = Fernet(key)
+                    cozulmus = f.decrypt(encrypted_message.strip())
+                    cozulmus_mesaj = cozulmus.decode()
+                    title, message = cozulmus_mesaj.split("\n", 1)
 
-                if title == entered_title:
-                    gizli_entry.insert(tk.END, message + "\n")
-                    status_label.config(text="Mesaj başarıyla çözüldü.")
-                    found = True
-                    break
-            except Exception as e:
-                status_label.config(text=f"Şifre çözmede hata: {str(e)}")
+                    if title == entered_title:
+                        gizli_entry.insert(tk.END, message + "\n")
+                        status_label.config(text="Mesaj başarıyla çözüldü.")
+                        found = True
+                        break
+                except Exception:
+                    continue
+            if found:
+                break
 
         if not found:
             status_label.config(text="Başlık veya anahtar hatalı.")
@@ -105,7 +112,7 @@ window.minsize(width=500, height=500)
 
 # Image display (assuming the image path is correct)
 try:
-    img = tk.PhotoImage(file='C:\\Users\\Gulbahar-NB\\Desktop\\Resimler\\topsecret.png')
+    img = tk.PhotoImage(file='topsecret.png')
     tk.Label(image=img).pack()
 except tk.TclError:
     print("Image file not found or format not supported.")
