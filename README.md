@@ -1,7 +1,7 @@
 
 # SecretNotes
 
-SECRET NOTES, kullanıcıların 'kriptografi' kitaplığını kullanarak mesajları güvenli bir şekilde şifrelemesine ve şifresini çözmesine olanak tanıyan Tkinter tabanlı bir Python uygulamasıdır. Uygulama, kullanıcıların şifreleme anahtarları oluşturmasına, mesajları şifrelemesine ve gerektiğinde şifrelerini çözmesine olanak tanır. Şifrelenmiş mesajlar ve anahtarlar ileride başvurmak üzere metin dosyalarına kaydedilir.
+SECRET NOTES, kullanıcıların 'cryptography ' kitaplığını kullanarak mesajları güvenli bir şekilde şifrelemesine ve şifresini çözmesine olanak tanıyan Tkinter tabanlı bir Python uygulamasıdır. Uygulama, kullanıcıların şifreleme anahtarları oluşturmasına, mesajları şifrelemesine ve gerektiğinde şifrelerini çözmesine olanak tanır. Şifrelenmiş mesajlar ve anahtarlar ileride başvurmak üzere metin dosyalarına kaydedilir.
 
 
 
